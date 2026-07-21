@@ -13,6 +13,7 @@ Nemuroid is a specialized fork of the Lemuroid project, redesigned with a Nothin
 - **Dot-Matrix Placeholders**: Loading states and missing covers feature a custom dot-matrix grid and Ndot initials.
 - **Interactive Boot Animation**: A tactile "cartridge insertion" animation that triggers reactively as the game engine loads
 - **Black and white themes**: It reads system information and uses a black or white theme
+- **Gruvbox themes**: The app has an option to use the color tones of Gruvbox
 It originated from a rib of [Retrograde](https://github.com/retrograde/retrograde-android), but graduated to a standalone project integrating [LibretroDroid](https://github.com/Swordfish90/LibretroDroid).
 
 ### Visuals
