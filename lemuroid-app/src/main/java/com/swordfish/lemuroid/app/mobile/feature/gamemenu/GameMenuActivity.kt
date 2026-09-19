@@ -47,7 +47,9 @@ import com.swordfish.lemuroid.app.mobile.feature.gamemenu.coreoptions.GameMenuCo
 import com.swordfish.lemuroid.app.mobile.feature.gamemenu.states.GameMenuStatesScreen
 import com.swordfish.lemuroid.app.mobile.feature.gamemenu.states.GameMenuStatesViewModel
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.AppTheme
-import com.swordfish.lemuroid.app.utils.android.settings.booleanPreferenceState
+import com.swordfish.lemuroid.app.mobile.shared.compose.ui.AppThemeType
+import com.swordfish.lemuroid.app.utils.android.settings.indexPreferenceState
+import com.swordfish.lemuroid.app.utils.android.stringListResource
 import com.swordfish.lemuroid.app.shared.GameMenuContract
 import com.swordfish.lemuroid.app.shared.coreoptions.LemuroidCoreOption
 import com.swordfish.lemuroid.app.shared.input.InputDeviceManager
@@ -138,8 +140,11 @@ class GameMenuActivity : RetrogradeComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun GameMenuScreen(gameMenuRequest: GameMenuRequest) {
-        val isGruvbox = booleanPreferenceState(R.string.pref_key_theme_gruvbox, false).value
-        AppTheme(isGruvbox = isGruvbox) {
+        val themeValues = stringListResource(R.array.theme_selection_values)
+        val themeSelection = indexPreferenceState(R.string.pref_key_theme_selection, "nothing", themeValues).value
+        val themeType = AppThemeType.fromString(themeValues.getOrNull(themeSelection))
+
+        AppTheme(themeType = themeType) {
             val navController = rememberNavController()
             val navBackStackEntry = navController.currentBackStackEntryAsState()
             val currentDestination = navBackStackEntry.value?.destination

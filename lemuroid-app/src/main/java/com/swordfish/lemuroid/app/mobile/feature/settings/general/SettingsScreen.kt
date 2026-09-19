@@ -194,7 +194,11 @@ private fun CustomisationSettings() {
         title = { Text(text = stringResource(id = R.string.settings_category_customisation)) },
     ) {
         val followSystem = booleanPreferenceState(R.string.pref_key_theme_follow_system, true)
-        val isGruvbox = booleanPreferenceState(R.string.pref_key_theme_gruvbox, false)
+        val themeSelection = indexPreferenceState(
+            R.string.pref_key_theme_selection,
+            "nothing",
+            stringListResource(R.array.theme_selection_values)
+        )
 
         LemuroidSettingsSwitch(
             state = followSystem,
@@ -208,12 +212,13 @@ private fun CustomisationSettings() {
                 subtitle = { Text(text = stringResource(id = R.string.settings_description_theme_dark)) },
             )
         }
-        LemuroidSettingsSwitch(
-            state = isGruvbox,
-            title = { Text(text = stringResource(id = R.string.settings_title_theme_gruvbox)) },
-            subtitle = { Text(text = stringResource(id = R.string.settings_description_theme_gruvbox)) },
+        LemuroidSettingsList(
+            state = themeSelection,
+            title = { Text(text = stringResource(id = R.string.settings_title_theme_selection)) },
+            subtitle = { Text(text = stringResource(id = R.string.settings_description_theme_selection)) },
+            items = stringListResource(R.array.theme_selection_names),
         )
-        if (!isGruvbox.value) {
+        if (themeSelection.value == 0) { // 0: nothing
             LemuroidSettingsSwitch(
                 state = booleanPreferenceState(R.string.pref_key_monochrome_icons, true),
                 title = { Text(text = stringResource(id = R.string.settings_title_monochrome_icons)) },

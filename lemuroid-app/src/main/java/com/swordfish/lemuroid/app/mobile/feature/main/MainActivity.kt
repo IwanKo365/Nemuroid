@@ -54,9 +54,13 @@ import com.swordfish.lemuroid.app.mobile.feature.shortcuts.ShortcutsGenerator
 import com.swordfish.lemuroid.app.mobile.feature.systems.MetaSystemsScreen
 import com.swordfish.lemuroid.app.mobile.feature.systems.MetaSystemsViewModel
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.AppTheme
+import com.swordfish.lemuroid.app.mobile.shared.compose.ui.AppThemeType
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.NdotFontFamily
 import androidx.compose.foundation.isSystemInDarkTheme
 import com.swordfish.lemuroid.app.utils.android.settings.booleanPreferenceState
+import com.swordfish.lemuroid.app.utils.android.stringListResource
+import com.swordfish.lemuroid.app.utils.settings.rememberSafePreferenceBooleanSettingState
+import com.swordfish.lemuroid.app.utils.settings.rememberSafePreferenceIndexSettingState
 import com.swordfish.lemuroid.app.shared.GameInteractor
 import com.swordfish.lemuroid.app.shared.game.BaseGameActivity
 import com.swordfish.lemuroid.app.shared.game.GameLauncher
@@ -139,17 +143,20 @@ class MainActivity : RetrogradeComponentActivity(), BusyActivity {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun MainScreen(navController: NavHostController) {
-        val followSystem = booleanPreferenceState(R.string.pref_key_theme_follow_system, true).value
-        val darkThemePref = booleanPreferenceState(R.string.pref_key_theme_dark, true).value
+        val prefs = remember { SharedPreferencesHelper.getSharedPreferences(this) }
+        val followSystem = rememberSafePreferenceBooleanSettingState(getString(R.string.pref_key_theme_follow_system), true, prefs).value
+        val darkThemePref = rememberSafePreferenceBooleanSettingState(getString(R.string.pref_key_theme_dark), true, prefs).value
         val isSystemDark = isSystemInDarkTheme()
         val darkTheme = if (followSystem) isSystemDark else darkThemePref
 
-        val useYellowAccent = booleanPreferenceState(R.string.pref_key_accent_yellow, false).value
+        val themeValues = stringListResource(R.array.theme_selection_values)
+        val themeSelection = rememberSafePreferenceIndexSettingState(getString(R.string.pref_key_theme_selection), themeValues, "nothing", prefs).value
+        val themeType = AppThemeType.fromString(themeValues.getOrNull(themeSelection))
+
+        val useYellowAccent = rememberSafePreferenceBooleanSettingState(getString(R.string.pref_key_accent_yellow), false, prefs).value
         val primaryColor = if (useYellowAccent) com.swordfish.lemuroid.app.mobile.shared.compose.ui.AppYellow else com.swordfish.lemuroid.app.mobile.shared.compose.ui.AppPrimary
 
-        val isGruvbox = booleanPreferenceState(R.string.pref_key_theme_gruvbox, false).value
-
-        AppTheme(darkTheme = darkTheme, isGruvbox = isGruvbox, primaryColor = primaryColor) {
+        AppTheme(darkTheme = darkTheme, themeType = themeType, primaryColor = primaryColor) {
             val navBackStackEntry = navController.currentBackStackEntryAsState()
             val currentDestination = navBackStackEntry.value?.destination
             val currentRoute =

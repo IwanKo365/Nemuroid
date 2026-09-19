@@ -18,10 +18,13 @@ import com.swordfish.lemuroid.app.mobile.feature.game.GameActivity
 import com.swordfish.lemuroid.app.mobile.feature.game.GameService
 import com.swordfish.lemuroid.app.mobile.feature.settings.SettingsManager
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.AppTheme
+import com.swordfish.lemuroid.app.mobile.shared.compose.ui.AppThemeType
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.AppPrimary
 import com.swordfish.lemuroid.app.mobile.shared.compose.ui.AppYellow
 import androidx.compose.foundation.isSystemInDarkTheme
+import com.swordfish.lemuroid.app.utils.android.stringListResource
 import com.swordfish.lemuroid.app.utils.settings.rememberSafePreferenceBooleanSettingState
+import com.swordfish.lemuroid.app.utils.settings.rememberSafePreferenceIndexSettingState
 import com.swordfish.lemuroid.lib.preferences.SharedPreferencesHelper
 import com.swordfish.lemuroid.app.shared.GameMenuContract
 import com.swordfish.lemuroid.app.shared.ImmersiveActivity
@@ -133,12 +136,14 @@ abstract class BaseGameActivity : ImmersiveActivity() {
             val isSystemDark = isSystemInDarkTheme()
             val darkTheme = if (followSystem) isSystemDark else darkThemePref
 
+            val themeValues = stringListResource(R.array.theme_selection_values)
+            val themeSelection = rememberSafePreferenceIndexSettingState(getString(R.string.pref_key_theme_selection), themeValues, "nothing", prefs).value
+            val themeType = AppThemeType.fromString(themeValues.getOrNull(themeSelection))
+
             val useYellowAccent = rememberSafePreferenceBooleanSettingState(getString(R.string.pref_key_accent_yellow), false, prefs).value
             val primaryColor = if (useYellowAccent) AppYellow else AppPrimary
 
-            val isGruvbox = rememberSafePreferenceBooleanSettingState(getString(R.string.pref_key_theme_gruvbox), false, prefs).value
-
-            AppTheme(darkTheme = darkTheme, isGruvbox = isGruvbox, useSurface = false, primaryColor = primaryColor) {
+            AppTheme(darkTheme = darkTheme, themeType = themeType, useSurface = false, primaryColor = primaryColor) {
                 BaseGameScreen(viewModel = baseGameScreenViewModel) {
                     GameScreen(viewModel)
                 }

@@ -68,9 +68,23 @@
     <string name="settings_description_accent_yellow">Switch from Nothing Red to Nothing Yellow</string>
     <string name="pref_key_accent_yellow" translatable="false">pref_key_accent_yellow</string>
 
-    <string name="settings_title_theme_gruvbox">Gruvbox theme</string>
-    <string name="settings_description_theme_gruvbox">Use retro-inspired earth tones</string>
-    <string name="pref_key_theme_gruvbox" translatable="false">pref_key_theme_gruvbox</string>
+    <string name="settings_title_theme_selection">App Theme</string>
+    <string name="settings_description_theme_selection">Choose your preferred color palette</string>
+    <string name="pref_key_theme_selection" translatable="false">pref_key_theme_selection</string>
+    <string-array name="theme_selection_names">
+        <item>Nothing</item>
+        <item>Gruvbox</item>
+        <item>Nord</item>
+        <item>Catppuccin</item>
+        <item>Tokyo Night</item>
+    </string-array>
+    <string-array name="theme_selection_values">
+        <item>nothing</item>
+        <item>gruvbox</item>
+        <item>nord</item>
+        <item>catppuccin</item>
+        <item>tokyo_night</item>
+    </string-array>
 
     <string name="settings_title_gamepad_settings">External devices</string>
     <string name="settings_description_gamepad_settings">Configure external gamepads and keyboards</string>
