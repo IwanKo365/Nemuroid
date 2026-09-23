@@ -88,6 +88,10 @@ object deps {
                 const val activityKtx = "androidx.activity:activity-ktx:${versions.activity}"
                 const val compose = "androidx.activity:activity-compose:${versions.activity}"
             }
+            object glance {
+                const val appwidget = "androidx.glance:glance-appwidget:1.1.0"
+                const val material3 = "androidx.glance:glance-material3:1.1.0"
+            }
             object compose {
                 const val composeBom = "androidx.compose:compose-bom:${versions.composeBom}"
                 const val material3 = "androidx.compose.material3:material3"

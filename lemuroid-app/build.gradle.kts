@@ -195,6 +195,8 @@ dependencies {
     implementation(deps.libs.androidx.compose.accompanist.navigationMaterial)
     implementation(deps.libs.androidx.compose.accompanist.drawablePainter)
     implementation(deps.libs.androidx.paging.compose)
+    implementation(deps.libs.androidx.glance.appwidget)
+    implementation(deps.libs.androidx.glance.material3)
     implementation(deps.libs.androidx.lifecycle.viewModelCompose)
     implementation(deps.libs.composeHtmlText)
 

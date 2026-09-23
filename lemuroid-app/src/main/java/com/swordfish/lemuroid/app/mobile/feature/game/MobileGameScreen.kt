@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
@@ -18,11 +19,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Height
 import androidx.compose.material.icons.filled.OpenInFull
+import androidx.compose.material.icons.filled.PanTool
 import androidx.compose.material.icons.filled.RotateLeft
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -95,6 +98,7 @@ fun MobileGameScreen(viewModel: BaseGameScreenViewModel) {
         val touchGamePads = currentControllerConfig?.getTouchControllerConfig()
         val leftGamePad = touchGamePads?.leftComposable
         val rightGamePad = touchGamePads?.rightComposable
+        val oneHandedGamePad = touchGamePads?.oneHandedComposable
 
         val hapticFeedbackMode =
             viewModel
@@ -155,10 +159,15 @@ fun MobileGameScreen(viewModel: BaseGameScreenViewModel) {
                         currentControllerConfig?.allowTouchOverlay ?: true,
                     ),
             ) {
+                val screenOffsetY = touchControllerSettings?.screenOffsetY ?: 0.0f
+                val screenSizeScale = touchControllerSettings?.screenSizeScale ?: 1.0f
+
                 Box(
                     modifier =
                         Modifier
                             .layoutId(GameScreenLayout.CONSTRAINTS_GAME_VIEW)
+                            .fillMaxSize(fraction = screenSizeScale.coerceIn(0.3f, 1.0f))
+                            .offset(y = (-screenOffsetY * 250).dp)
                             .onGloballyPositioned { viewportPosition.value = it.boundsInRoot() },
                 )
 
@@ -169,29 +178,37 @@ fun MobileGameScreen(viewModel: BaseGameScreenViewModel) {
 
                 if (isVisible) {
                     CompositionLocalProvider(LocalLemuroidPadTheme provides LemuroidPadTheme()) {
-                        if (!isLandscape) {
-                            PadContainer(
-                                modifier = Modifier.layoutId(GameScreenLayout.CONSTRAINTS_BOTTOM_CONTAINER),
+                        if (touchControllerSettings.oneHandedMode && oneHandedGamePad != null) {
+                            oneHandedGamePad.invoke(
+                                this,
+                                Modifier.fillMaxSize(),
+                                touchControllerSettings,
                             )
-                        } else if (!currentControllerConfig.allowTouchOverlay) {
-                            PadContainer(
-                                modifier = Modifier.layoutId(GameScreenLayout.CONSTRAINTS_LEFT_CONTAINER),
+                        } else {
+                            if (!isLandscape) {
+                                PadContainer(
+                                    modifier = Modifier.layoutId(GameScreenLayout.CONSTRAINTS_BOTTOM_CONTAINER),
+                                )
+                            } else if (!currentControllerConfig.allowTouchOverlay) {
+                                PadContainer(
+                                    modifier = Modifier.layoutId(GameScreenLayout.CONSTRAINTS_LEFT_CONTAINER),
+                                )
+                                PadContainer(
+                                    modifier = Modifier.layoutId(GameScreenLayout.CONSTRAINTS_RIGHT_CONTAINER),
+                                )
+                            }
+
+                            leftGamePad?.invoke(
+                                this,
+                                Modifier.layoutId(GameScreenLayout.CONSTRAINTS_LEFT_PAD),
+                                touchControllerSettings,
                             )
-                            PadContainer(
-                                modifier = Modifier.layoutId(GameScreenLayout.CONSTRAINTS_RIGHT_CONTAINER),
+                            rightGamePad?.invoke(
+                                this,
+                                Modifier.layoutId(GameScreenLayout.CONSTRAINTS_RIGHT_PAD),
+                                touchControllerSettings,
                             )
                         }
-
-                        leftGamePad?.invoke(
-                            this,
-                            Modifier.layoutId(GameScreenLayout.CONSTRAINTS_LEFT_PAD),
-                            touchControllerSettings,
-                        )
-                        rightGamePad?.invoke(
-                            this,
-                            Modifier.layoutId(GameScreenLayout.CONSTRAINTS_RIGHT_PAD),
-                            touchControllerSettings,
-                        )
 
                         GameScreenRunningCentralMenu(
                             modifier = Modifier.layoutId(GameScreenLayout.CONSTRAINTS_GAME_CONTAINER),
@@ -289,6 +306,39 @@ private fun MenuEditTouchControls(
                         },
                     )
                 }
+                MenuEditTouchControlRow(Icons.Default.OpenInFull, "Button Size", 0f) {
+                    Slider(
+                        value = touchControllerSettings.buttonScale,
+                        valueRange = TouchControllerSettingsManager.MIN_BUTTON_SCALE..TouchControllerSettingsManager.MAX_BUTTON_SCALE,
+                        onValueChange = {
+                            viewModel.updateTouchControllerSettings(
+                                touchControllerSettings.copy(buttonScale = it),
+                            )
+                        },
+                    )
+                }
+                MenuEditTouchControlRow(Icons.Default.OpenInFull, "Screen Size", 0f) {
+                    Slider(
+                        value = touchControllerSettings.screenSizeScale,
+                        valueRange = TouchControllerSettingsManager.MIN_SCREEN_SIZE_SCALE..TouchControllerSettingsManager.MAX_SCREEN_SIZE_SCALE,
+                        onValueChange = {
+                            viewModel.updateTouchControllerSettings(
+                                touchControllerSettings.copy(screenSizeScale = it),
+                            )
+                        },
+                    )
+                }
+                MenuEditTouchControlRow(Icons.Default.Height, "Screen Position (Up/Down)", 0f) {
+                    Slider(
+                        value = touchControllerSettings.screenOffsetY,
+                        valueRange = TouchControllerSettingsManager.MIN_SCREEN_OFFSET_Y..TouchControllerSettingsManager.MAX_SCREEN_OFFSET_Y,
+                        onValueChange = {
+                            viewModel.updateTouchControllerSettings(
+                                touchControllerSettings.copy(screenOffsetY = it),
+                            )
+                        },
+                    )
+                }
                 MenuEditTouchControlRow(Icons.Default.Height, "Horizontal Margin", 90f) {
                     Slider(
                         value = touchControllerSettings.marginX,
@@ -309,13 +359,47 @@ private fun MenuEditTouchControls(
                         },
                     )
                 }
-                if (controllerConfig.allowTouchRotation) {
-                    MenuEditTouchControlRow(Icons.Default.RotateLeft, "Rotate", 0f) {
-                        Slider(
-                            value = touchControllerSettings.rotation,
-                            onValueChange = {
+                MenuEditTouchControlRow(Icons.Default.RotateLeft, "Rotate", 0f) {
+                    Slider(
+                        value = touchControllerSettings.rotation,
+                        onValueChange = {
+                            viewModel.updateTouchControllerSettings(
+                                touchControllerSettings.copy(rotation = it),
+                            )
+                        },
+                    )
+                }
+                MenuEditTouchControlRow(Icons.Default.PanTool, stringResource(com.swordfish.lemuroid.R.string.settings_title_one_handed_mode), 0f) {
+                    Switch(
+                        checked = touchControllerSettings.oneHandedMode,
+                        onCheckedChange = {
+                            viewModel.updateTouchControllerSettings(
+                                touchControllerSettings.copy(oneHandedMode = it),
+                            )
+                        },
+                    )
+                }
+                if (touchControllerSettings.oneHandedMode) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PanTool,
+                                contentDescription = "One Handed Side",
+                            )
+                            Text(text = if (touchControllerSettings.oneHandedIsLeft) "Left Side" else "Right Side")
+                        }
+                        Switch(
+                            checked = touchControllerSettings.oneHandedIsLeft,
+                            onCheckedChange = {
                                 viewModel.updateTouchControllerSettings(
-                                    touchControllerSettings.copy(rotation = it),
+                                    touchControllerSettings.copy(oneHandedIsLeft = it),
                                 )
                             },
                         )

@@ -23,12 +23,23 @@ class TouchControllerSettingsManager(private val sharedPreferences: SharedPrefer
         LANDSCAPE,
     }
 
+    private val json = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+        coerceInputValues = true
+    }
+
     @Serializable
     data class Settings(
         val scale: Float = DEFAULT_SCALE,
         val rotation: Float = DEFAULT_ROTATION,
         val marginX: Float = DEFAULT_MARGIN_X,
         val marginY: Float = DEFAULT_MARGIN_Y,
+        val oneHandedMode: Boolean = false,
+        val oneHandedIsLeft: Boolean = false,
+        val buttonScale: Float = DEFAULT_BUTTON_SCALE,
+        val screenOffsetY: Float = DEFAULT_SCREEN_OFFSET_Y,
+        val screenSizeScale: Float = DEFAULT_SCREEN_SIZE_SCALE,
     )
 
     private fun computeInsetsPaddings(
@@ -66,13 +77,18 @@ class TouchControllerSettingsManager(private val sharedPreferences: SharedPrefer
                 rotation = DEFAULT_ROTATION,
                 marginX = horizontalPadding.value / MAX_MARGINS,
                 marginY = verticalPadding.value / MAX_MARGINS,
+                oneHandedMode = false,
+                oneHandedIsLeft = false,
+                buttonScale = DEFAULT_BUTTON_SCALE,
+                screenOffsetY = DEFAULT_SCREEN_OFFSET_Y,
+                screenSizeScale = DEFAULT_SCREEN_SIZE_SCALE,
             )
         val settingsKey = getPreferenceString(touchControllerID, orientation)
         val cachedStateFlow =
             cachedSettings.getOrPut(settingsKey) {
                 val currentSettings =
                     sharedPreferences.getString(settingsKey, null)
-                        ?.let { Json.decodeFromString(Settings.serializer(), it) }
+                        ?.let { json.decodeFromString(Settings.serializer(), it) }
 
                 MutableStateFlow(currentSettings)
             }
@@ -90,7 +106,7 @@ class TouchControllerSettingsManager(private val sharedPreferences: SharedPrefer
             sharedPreferences.edit {
                 putString(
                     getPreferenceString(touchControllerID, orientation),
-                    Json.encodeToString(Settings.serializer(), settings),
+                    json.encodeToString(Settings.serializer(), settings),
                 )
             }
         }
@@ -123,6 +139,18 @@ class TouchControllerSettingsManager(private val sharedPreferences: SharedPrefer
         const val DEFAULT_ROTATION = 0.0f
         const val DEFAULT_MARGIN_X = 0.0f
         const val DEFAULT_MARGIN_Y = 0.0f
+        const val DEFAULT_BUTTON_SCALE = 1.0f
+        const val DEFAULT_SCREEN_OFFSET_Y = 0.0f
+        const val DEFAULT_SCREEN_SIZE_SCALE = 1.0f
+
+        const val MIN_BUTTON_SCALE = 0.5f
+        const val MAX_BUTTON_SCALE = 1.5f
+
+        const val MIN_SCREEN_OFFSET_Y = -1.0f
+        const val MAX_SCREEN_OFFSET_Y = 1.0f
+
+        const val MIN_SCREEN_SIZE_SCALE = 0.3f
+        const val MAX_SCREEN_SIZE_SCALE = 1.0f
 
         const val MAX_ROTATION = 45f
         const val MIN_SCALE = 0.75f

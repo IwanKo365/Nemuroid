@@ -12,6 +12,8 @@ Nemuroid is a specialized fork of the Lemuroid project, redesigned with a Nothin
 - **Monochrome Cartridge Overlay**: Game cards feature a simplified, monochrome cartridge-inspired design with white borders and system-specific pills.
 - **Dot-Matrix Placeholders**: Loading states and missing covers feature a custom dot-matrix grid and Ndot initials.
 - **Interactive Boot Animation**: A tactile "cartridge insertion" animation that triggers reactively as the game engine loads
+- **One-Handed Mode**: Dedicated one-handed touch layout with D-Pad and face buttons grouped on either the Left or Right side of the screen, with secondary controls placed inward for comfortable single-handed play.
+- **Enhanced Display & Touch Customization**: Real-time sliders for game screen vertical position (move screen up/down), game screen size, button scaling, overall controller scale, and margins.
 - **Black and white themes**: It reads system information and uses a black or white theme
 - **Gruvbox themes**: The app has an option to use the color tones of Gruvbox
 It originated from a rib of [Retrograde](https://github.com/retrograde/retrograde-android), but graduated to a standalone project integrating [LibretroDroid](https://github.com/Swordfish90/LibretroDroid).
