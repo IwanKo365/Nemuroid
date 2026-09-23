@@ -88,13 +88,6 @@ fun PadKitScope.OneHandedLayout(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp * interpolatedScale)
                 ) {
-                    // Face Buttons (A, B, X, Y...)
-                    LemuroidControlFaceButtons(
-                        modifier = Modifier.size(mainControlSize),
-                        ids = faceButtonIds,
-                        idsForegrounds = faceButtonForegrounds
-                    )
-
                     // D-Pad
                     if (dpadId != null) {
                         LemuroidControlCross(
@@ -102,6 +95,13 @@ fun PadKitScope.OneHandedLayout(
                             id = dpadId
                         )
                     }
+
+                    // Face Buttons (A, B, X, Y...)
+                    LemuroidControlFaceButtons(
+                        modifier = Modifier.size(mainControlSize),
+                        ids = faceButtonIds,
+                        idsForegrounds = faceButtonForegrounds
+                    )
                 }
             }
 
